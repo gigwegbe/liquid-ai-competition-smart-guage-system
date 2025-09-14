@@ -1,0 +1,4 @@
+outlines
+llguidance
+llama-cpp-python
+# pip install "smolagents[toolkit]"
