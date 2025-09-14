@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 models/
 .DS_Store
-other-script/
+other-scripts/
 others-notebook/
 # C extensions
 *.so
