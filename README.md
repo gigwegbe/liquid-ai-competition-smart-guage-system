@@ -1,4 +1,11 @@
 # Liquid AI Competition Smart Guage System 
+Smart Gauge System is a project that uses computer vision with LM (Language Models) capabilities to monitor gauges, read sensor data, and control external devices (e.g. fan) through a combined backend + frontend system. Designed for edge deployment (e.g. Jetson) as well as local development.
+
+### Features
+- Vision‐based gauge reading (using LFM2-VL-450M)
+- Tool calling to fetch sensor data from database (e.g. LFM2-350M)
+- Ability to control hardware (fan) via tool calls
+- Supports local development and deployment on Jetson / edge devices
 
 Demo: [Video 1](?) [Video 2](?)
 
