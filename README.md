@@ -8,12 +8,14 @@ Demo: [Video 1](?) [Video 2](?)
 
 ![Guage Inspector](./assets/asset-fan.png)
 ## How to run the Application
-### Backend 
 
+### Backend 
+- Start the Guage Inspector VLM
 ```
 python3 app-vlm-inference.py
 ```
 
+- Start the Guage Inspector LLM
 ```
 python3 app-llm-inference.py
 ```
