@@ -2,7 +2,7 @@
 
 Demo: [Video 1](?) [Video 2](?)
 
-### Using Text Capabilities Only With Ollama
+### Using With Vision Capabilities to Inspector Guages
 ![Guage Inspector](./assets/asset-full.png)
 
 ### Using Tool Calling to get sensor reading from database 
