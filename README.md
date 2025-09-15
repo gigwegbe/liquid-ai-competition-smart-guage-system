@@ -1,4 +1,4 @@
-# Liquid AI Competition Smart Guage System 
+# Liquid AI Competition Smart Gauge System 
 Smart Gauge System is a project that uses computer vision with LM (Language Models) capabilities to monitor gauges, read sensor data, and control external devices (e.g. fan) through a combined backend + frontend system. Designed for edge deployment (e.g. Jetson) as well as local development.
 
 ### Features
@@ -9,14 +9,14 @@ Smart Gauge System is a project that uses computer vision with LM (Language Mode
 
 Demo: [Video 1](?) [Video 2](?)
 
-### Using Vision Capabilities to Inspector Guages (LFM2-VL-450M)
-![Guage Inspector](./assets/asset-full.png)
+### Using Vision Capabilities to Inspector Gauges (LFM2-VL-450M)
+![Gauge Inspector](./assets/asset-full.png)
 
 ### Using Tool Calling to get sensor reading from database(LFM2-350M)
-![Guage Inspector](./assets/asset-sensor-reading.png)
+![Gauge Inspector](./assets/asset-sensor-reading.png)
 
 ### Using Tool Calling to control Fan (LFM2-350M)
-![Guage Inspector](./assets/asset-fan.png)
+![Gauge Inspector](./assets/asset-fan.png)
 ## How to run the Application
 
 ### Backend
@@ -36,12 +36,12 @@ conda activate vlmenv
 pip install  -r requirements.txt
 ```
 
-- Start the Guage Inspector VLM
+- Start the Gauge Inspector VLM
 ```
 python3 app-vlm-inference.py
 ```
 
-- Start the Guage Inspector LLM (In another terminal with the same environment)
+- Start the Gauge Inspector LLM (In another terminal with the same environment)
 ```
 python3 app-llm-inference.py
 ```
@@ -73,7 +73,7 @@ http://localhost:5173/
 - Refresh if needed: If the app doesn’t load immediately, try refreshing the page in your browser.
 
 
-![Guage Inspector](./assets/jetson-orin.jpg)
+![Gauge Inspector](./assets/jetson-orin.jpg)
 ## Optional: Jetson / Edge Setup
 
 If using Jetson or similar edge hardware:
