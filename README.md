@@ -73,6 +73,13 @@ http://localhost:5173/
 - Refresh if needed: If the app doesn’t load immediately, try refreshing the page in your browser.
 
 
+## Optional: Jetson / Edge Setup
+
+If using Jetson or similar edge hardware:
+Use vlm_processor_jetson.py for hardware‐specific optimizations
+Verify any special dependencies (e.g. CUDA, camera drivers)
+Adjust configuration / paths as needed
+
 ## TODO 
 - update video 
 - install on jetson (check the vlm_processor_jetson)
