@@ -40,19 +40,26 @@ python3 app-llm-inference.py
 ```
 
 ### Frontend 
+Make sure you have install `npm` on your machine: 
+
+- Then change the directory into the working directory: 
 ```
 cd vlm-instaector 
 ```
 
+- Install the dependencies: 
 ```
 npm install 
 ```
 
+- Run the app: 
 ```
 npm run dev 
 ```
 
-open the app and refresh the page: 
+- Follow the path provided by the `run` command, mine is `http://localhost:5173/`
+
+- Open the app and refresh the page: 
 ```
 http://localhost:5173/
 ```
