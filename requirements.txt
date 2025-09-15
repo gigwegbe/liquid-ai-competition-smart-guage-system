@@ -7,3 +7,5 @@ Flask
 flask_cors
 requests
 pillow 
+accelerate
+pandas 

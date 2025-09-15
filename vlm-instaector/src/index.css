@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fallback styles in case Tailwind doesn't load */
+.tailwind-test {
+  padding: 2rem;
+  background-color: #ef4444;
+  color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  max-width: 28rem;
+  margin: 2rem auto;
+}
+
+.tailwind-test h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.tailwind-test p {
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+
+.color-boxes {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.color-box {
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.color-box.blue { background-color: #3b82f6; }
+.color-box.green { background-color: #10b981; }
+.color-box.yellow { background-color: #f59e0b; color: black; }

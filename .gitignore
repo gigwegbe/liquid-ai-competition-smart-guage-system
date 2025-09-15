@@ -9,8 +9,8 @@ others-notebook/
 merged_gauges_csv/
 merged_gauges_csv_new/
 vlm-instaector.zip
-vlm-instaector/
 merged_gauges_csv_old/
+vlm-instaector/node_modules/
 # C extensions
 *.so
 

@@ -34,7 +34,7 @@ pip install  -r requirements.txt
 python3 app-vlm-inference.py
 ```
 
-- Start the Guage Inspector LLM
+- Start the Guage Inspector LLM (In another terminal with the same environment)
 ```
 python3 app-llm-inference.py
 ```
@@ -52,8 +52,12 @@ npm install
 npm run dev 
 ```
 
+open the app and refresh the page: 
+```
+http://localhost:5173/
+```
 
 ## TODO 
 - update video 
-- install on jetson 
-- 
+- install on jetson (check the vlm_processor_jetson)
+- Add dataset samples
