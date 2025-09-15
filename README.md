@@ -7,7 +7,7 @@ Smart Gauge System is a project that uses computer vision with LM (Language Mode
 - Ability to control hardware (fan) via tool calls
 - Supports local development and deployment on Jetson / edge devices
 
-Demo: [Video 1](?) [Video 2](?)
+<!-- Demo: [Video 1](?) [Video 2](?) -->
 
 ### Using Vision Capabilities to Inspector Gauges (LFM2-VL-450M)
 ![Gauge Inspector](./assets/asset-full.png)
@@ -75,13 +75,10 @@ http://localhost:5173/
 
 ![Gauge Inspector](./assets/jetson-orin.jpg)
 ## Optional: Jetson / Edge Setup
-
 If using Jetson or similar edge hardware:
 
 - Use `vlm_processor_jetson.py` and `app-vlm-inference-jetson.py` for hardware‐specific optimizations
 - Verify any special dependencies (e.g. CUDA)
 - Adjust configuration / paths as needed
 
-## TODO 
-- update video 
-- install on jetson (check the vlm_processor_jetson)
+![Gauge Inspector](./assets/jetson.png)
