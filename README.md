@@ -2,13 +2,13 @@
 
 Demo: [Video 1](?) [Video 2](?)
 
-### Using With Vision Capabilities to Inspector Guages
+### Using Vision Capabilities to Inspector Guages (LFM2-VL-450M)
 ![Guage Inspector](./assets/asset-full.png)
 
-### Using Tool Calling to get sensor reading from database 
+### Using Tool Calling to get sensor reading from database(LFM2-350M)
 ![Guage Inspector](./assets/asset-sensor-reading.png)
 
-### Using Tool Calling to control actuator (fan)
+### Using Tool Calling to control Fan (LFM2-350M)
 ![Guage Inspector](./assets/asset-fan.png)
 ## How to run the Application
 
