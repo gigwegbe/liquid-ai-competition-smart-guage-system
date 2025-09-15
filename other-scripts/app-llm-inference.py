@@ -1,206 +1,176 @@
 import json
 import time
-import requests
-import sseclient
 import torch
+import sqlite3
+import pandas as pd
 from transformers import AutoTokenizer, AutoModelForCausalLM
-import re # Import regex for more advanced parsing
-
+import re
 
 # ========================
-# 1️⃣ Load the LLM
+# 1️⃣ Load the LLM and its specific tool-use template
 # ========================
 MODEL_NAME = "LiquidAI/LFM2-350M"
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
+model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, trust_remote_code=True)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
 print(f"[INFO] LLM loaded successfully on {device}.")
 
 # ========================
-# 2️⃣ Define tools/actions
+# 2️⃣ Function definitions for tools
 # ========================
-def turn_on_drain():
-    print("[ACTION] Drain is now ON")
+def control_fan(state: str):
+    """
+    Controls the state of the fan.
+    Args:
+        state (str): The desired state of the fan, either "on" or "off".
+    Returns:
+        str: A confirmation message indicating the fan's new state.
+    """
+    if state.lower() == "on":
+        print("Turning fan ON...")
+        # Add your actual fan ON logic here
+        return "The fan has been turned on."
+    elif state.lower() == "off":
+        print("Turning fan OFF...")
+        # Add your actual fan OFF logic here
+        return "The fan has been turned off."
+    else:
+        return "Invalid state. Please specify 'on' or 'off'."
 
-def open_pressure_valve():
-    print("[ACTION] Pressure valve is now OPEN")
+def control_drain(state: str):
+    """
+    Controls the state of the drain.
+    Args:
+        state (str): The desired state of the drain, either "open" or "closed".
+    Returns:
+        str: A confirmation message indicating the drain's new state.
+    """
+    if state.lower() == "open":
+        print("Opening drain...")
+        # Add your actual drain OPEN logic here
+        return "The drain has been opened."
+    elif state.lower() == "closed":
+        print("Closing drain...")
+        # Add your actual drain CLOSE logic here
+        return "The drain has been closed."
+    else:
+        return "Invalid state. Please specify 'open' or 'closed'."
 
-def start_cooling_system():
-    print("[ACTION] Cooling system is now ON")
+def get_sensor_data():
+    """
+    Fetches the latest sensor data from the SQLite database.
+    Returns:
+        str: A JSON string containing the latest temperature, pressure, and rain.
+    """
+    db_path = "sensors-json.db"
+    try:
+        conn = sqlite3.connect(db_path)
+        # Select the latest temperature, pressure, and rain from the sensor_data table
+        # Note: The error "no such column: humidity" suggests your database might not have a 'humidity' column.
+        # I've adjusted the query to only include columns that are present in your original code (temperature, pressure, rain).
+        query = "SELECT temperature, pressure, rain FROM sensor_data ORDER BY timestamp DESC LIMIT 1"
+        df = pd.read_sql_query(query, conn)
+        conn.close()
 
-TOOLS = {
-    "turn_on_drain": turn_on_drain,
-    "open_pressure_valve": open_pressure_valve,
-    "start_cooling_system": start_cooling_system,
-}
+        if df.empty:
+            return json.dumps({"status": "error", "message": "No data found in the database."})
 
+        latest_data = df.iloc[0].to_dict()
+        return json.dumps({"status": "success", "data": latest_data})
+
+    except sqlite3.Error as e:
+        return json.dumps({"status": "error", "message": f"Database error: {e}"})
+    except Exception as e:
+        return json.dumps({"status": "error", "message": f"An unexpected error occurred: {e}"})
 
 # ========================
-# 3️⃣ Query LLM
+# 3️⃣ Main processing function
 # ========================
-def query_model(prompt, max_tokens=150):
-    """Queries the LLM with a given prompt and returns the decoded response."""
-    inputs = tokenizer(prompt, return_tensors="pt").to(device)
-    
-    # Adjust generation parameters for more structured output
-    # Lower temperature makes output more deterministic, crucial for JSON generation.
-    # do_sample=True is still needed to enable sampling even with low temperature.
-    outputs = model.generate(
-        **inputs,
-        max_new_tokens=max_tokens,
-        temperature=0.1,  
+def process_llm_response(user_input):
+    # Construct the prompt with all tool definitions
+    system_message = """List of tools: <|tool_list_start|>[
+        {"name": "control_fan", "description": "Controls the state of the fan. Use this to turn the fan on or off.", "parameters": {"type": "object", "properties": {"state": {"type": "string", "enum": ["on", "off"], "description": "The desired state of the fan ('on' or 'off')."}}, "required": ["state"]}},
+        {"name": "control_drain", "description": "Controls the state of the drain. Use this to open or close the drain.", "parameters": {"type": "object", "properties": {"state": {"type": "string", "enum": ["open", "closed"], "description": "The desired state of the drain ('open' or 'closed')."}}, "required": ["state"]}},
+        {"name": "get_sensor_data", "description": "Retrieves the most recent temperature, pressure, and rain data from the sensors database. Use this tool when asked about current sensor readings or environmental conditions.", "parameters": {"type": "object", "properties": {}}}
+    ]<|tool_list_end|>
+    You are a helpful assistant.
+    """
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": user_input}
+    ]
+
+    input_ids = tokenizer.apply_chat_template(
+        messages,
+        add_generation_prompt=True,
+        return_tensors="pt",
+        tokenize=True,
+    ).to(device)
+
+    # Generate the model's response
+    output = model.generate(
+        input_ids,
+        max_new_tokens=512,  # Adjust as needed
         do_sample=True,
-        pad_token_id=tokenizer.eos_token_id # Set pad_token_id to prevent warnings
+        temperature=0.3,
+        min_p=0.15,
+        repetition_penalty=1.05,
     )
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    return response
 
-def parse_tool_calls(output_text):
-    """
-    Parses the LLM output to extract tool calls.
-    Handles cases where tool calls are embedded within other text or are not valid JSON.
-    Returns a list of tool call dictionaries.
-    """
-    tool_calls = []
-    
-    # Regular expression to find potential JSON structures (lists or single objects)
-    # that might represent tool calls. This is more robust than simple string finding.
-    json_pattern = re.compile(r'(\[.*?\]|\{.*?\})', re.DOTALL)
-    potential_jsons = json_pattern.findall(output_text)
+    decoded_output = tokenizer.decode(output[0], skip_special_tokens=False)
 
-    for json_str in potential_jsons:
+    # Parse the output for tool calls
+    tool_call_match = re.search(r"<\|tool_call_start\|>\[(.*?)\]<\|tool_call_end\|>", decoded_output, re.DOTALL)
+
+    if tool_call_match:
+        tool_call_str = tool_call_match.group(1).strip()
         try:
-            # Try parsing as a list of calls first
-            calls_list = json.loads(json_str)
-            if isinstance(calls_list, list):
-                for call in calls_list:
-                    # Ensure it's a dictionary and has a tool/action key
-                    if isinstance(call, dict) and ("tool" in call or "action" in call):
-                        tool_calls.append(call)
-            # If not a list, try parsing as a single call dictionary
-            elif isinstance(calls_list, dict) and ("tool" in calls_list or "action" in calls_list):
-                tool_calls.append(calls_list)
-        except json.JSONDecodeError:
-            # If parsing fails, it's not valid JSON.
-            # We could add more complex logic here to search for specific LLM tokens 
-            # if the model used custom delimiters for tool calls, but for now, 
-            # we rely on it outputting valid JSON as instructed.
-            # print(f"[DEBUG] Skipping non-JSON string: {json_str}") # Uncomment for debugging
-            pass
-    
-    # If no JSON was found but the model output might have indicated a tool call
-    # this section could be expanded. For now, we assume the model adheres to JSON output.
-    # Example: if output_text contains "<|tool_call_start|>" etc.
+            # Basic parsing for function calls
+            func_name_match = re.match(r"(\w+)\((.*)\)", tool_call_str)
+            if func_name_match:
+                func_name = func_name_match.group(1)
+                args_str = func_name_match.group(2)
+                args = {}
+                # Parse arguments (simple key-value pairs)
+                for arg_pair in args_str.split(','):
+                    if '=' in arg_pair:
+                        key, value = arg_pair.split('=', 1)
+                        # Clean up potential quotes around values
+                        args[key.strip()] = value.strip().strip('"\'')
 
-    return tool_calls
-
-def execute_calls(calls):
-    """Executes a list of tool calls by looking them up in the TOOLS dictionary."""
-    if not calls:
-        print("[INFO] No tool calls to execute.")
-        return
-        
-    print(f"[INFO] Executing calls: {calls}")
-    
-    for call in calls:
-        # Determine the tool name, prioritizing 'tool' key, then 'action'
-        tool_name = call.get("tool") or call.get("action")
-        args = call.get("args", {})
-        
-        tool_fn = TOOLS.get(tool_name) # Look up the function in our TOOLS dictionary
-        
-        if tool_fn:
-            try:
-                # Call the function, passing arguments if they exist
-                if args:
-                    tool_fn(**args)
+                if func_name == "control_fan":
+                    tool_response = control_fan(**args)
+                elif func_name == "control_drain":
+                    tool_response = control_drain(**args)
+                elif func_name == "get_sensor_data":
+                    tool_response = get_sensor_data()
                 else:
-                    tool_fn()
-            except Exception as e:
-                # Catch and report errors during function execution (e.g., wrong arguments)
-                print(f"[ERROR] Failed to execute tool '{tool_name}' with args {args}: {e}")
-        else:
-            # Warn if the identified tool name is not in our defined TOOLS
-            print(f"[WARNING] Tool '{tool_name}' not found in TOOLS dictionary.")
-
-# ========================
-# 4️⃣ Continuous SSE monitoring
-# ========================
-def monitor_sensors_sse(stream_url="http://localhost:5001/stream"):
-    """Connects to an SSE stream, processes sensor readings, and triggers LLM actions."""
-    while True: # Loop indefinitely to maintain connection and retries
-        try:
-            print(f"[INFO] Connecting to SSE stream at {stream_url}...")
-            # Establish connection with a timeout to avoid hanging
-            response = requests.get(stream_url, stream=True, timeout=10) 
-            response.raise_for_status() # Raise an exception for bad HTTP status codes (e.g., 404, 500)
-            
-            client = sseclient.SSEClient(response)
-            print("[INFO] Connected to SSE stream successfully.")
-
-            for event in client.events():
-                try:
-                    data = json.loads(event.data)
-                except json.JSONDecodeError:
-                    print(f"[WARNING] Could not decode JSON from SSE event: {event.data}")
-                    continue # Skip this event if data is not valid JSON
-
-                # Safely extract gauge readings
-                gauge_readings = data.get("vlm_analysis", {}).get("gauge_readings", {})
-                if not gauge_readings:
-                    # print("[DEBUG] No gauge readings in event data.") # Uncomment for debugging
-                    continue # Skip if no gauge readings are present in this event
-
-                # Build a structured prompt for the LLM
-                # Explicitly instruct the model to ONLY output JSON for tool calls.
-                # Provide clear thresholds and current sensor values.
-                prompt = f"""You are an AI assistant monitoring environmental sensors.
-Your task is to analyze the following readings and trigger actions based on predefined thresholds.
-Respond ONLY in JSON format, listing the tool calls to be executed.
-
-**Thresholds:**
-- Rainfall height > 10mm: trigger `turn_on_drain`
-- Pressure > 1 bar: trigger `open_pressure_valve`
-- Temperature > 50 C: trigger `start_cooling_system`
-
-**Current readings:**
-Temperature: {gauge_readings.get('temperature', 'N/A')} C
-Pressure: {gauge_readings.get('pressure', 'N/A')} bar
-Rainfall Height: {gauge_readings.get('rainfall_height', 'N/A')} mm
-
-Your JSON output should be a list of objects, where each object has a "tool" key specifying the action and an optional "args" key for parameters.
-Example: `[{{"tool": "turn_on_drain"}}, {{"tool": "start_cooling_system", "args": {{"level": "high"}}}}]`
-
-If no actions are needed based on the thresholds, output an empty JSON list `[]`.
-
-**JSON Output:**
-"""
-                # print(f"[DEBUG] Prompt sent to LLM:\n{prompt}") # Uncomment for debugging
+                    return "Error: Unsupported tool call."
                 
-                output = query_model(prompt)
-                # print(f"[DEBUG] Raw LLM output:\n{output}") # Uncomment for debugging
-                
-                parsed_calls = parse_tool_calls(output)
-                execute_calls(parsed_calls)
-
-                print(f"[INFO] Processed readings: {gauge_readings}")
-
-        except requests.exceptions.RequestException as e:
-            # Handle network-related errors and retry
-            print(f"[ERROR] SSE connection error: {e}. Retrying in 5 seconds...")
-            time.sleep(5)
+                # Format the tool response to send back to the LLM
+                return f"<|tool_response_start|>{tool_response}<|tool_response_end|>"
+            else:
+                return "Error: Could not parse tool call arguments."
         except Exception as e:
-            # Catch any other unexpected errors and retry
-            print(f"[ERROR] An unexpected error occurred during SSE monitoring: {e}. Retrying in 5 seconds...")
-            time.sleep(5)
+            return f"Error executing tool call: {e}"
+    else:
+        # If no tool call, return the decoded assistant response
+        assistant_response_match = re.search(r"<\|im_start\|>assistant(.*?)<\|im_end\|>", decoded_output, re.DOTALL)
+        if assistant_response_match:
+            return assistant_response_match.group(1).strip()
+        else:
+            return "Could not understand the request or generate a response."
 
 # ========================
-# 5️⃣ Main Execution Block
+# 4️⃣ Dynamic User Input and Execution
 # ========================
 if __name__ == "__main__":
-    # This assumes your SSE server is running on http://localhost:5001/stream
-    # If your server uses a different URL, update the stream_url accordingly.
-    # Example: monitor_sensors_sse(stream_url="http://192.168.1.100:8080/events")
-    monitor_sensors_sse()
+    while True:
+        user_request = input("Enter your request (type 'exit' to quit): ")
+        if user_request.lower() == 'exit':
+            break
+        
+        response = process_llm_response(user_request)
+        print(f"\nUser: {user_request}\nAssistant: {response}\n")

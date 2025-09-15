@@ -26,7 +26,7 @@ CORS(app)
 
 # Configuration
 # IMAGE_FOLDER = 'merged_gauges_csv'
-IMAGE_FOLDER = '/Users/george/Downloads/merged_gauges_csv'
+IMAGE_FOLDER = 'merged_gauges_csv'
 STREAM_INTERVAL = 10  # seconds
 ENABLE_VLM = VLM_AVAILABLE  # Only enable if VLM is available
 

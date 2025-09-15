@@ -5,6 +5,12 @@ import sqlite3
 import pandas as pd
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import re
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+
+# Initialize Flask app
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # ========================
 # 1️⃣ Load the LLM and its specific tool-use template
@@ -164,13 +170,47 @@ def process_llm_response(user_input):
             return "Could not understand the request or generate a response."
 
 # ========================
-# 4️⃣ Dynamic User Input and Execution
+# 4️⃣ Flask API Endpoint
 # ========================
-if __name__ == "__main__":
-    while True:
-        user_request = input("Enter your request (type 'exit' to quit): ")
-        if user_request.lower() == 'exit':
-            break
-        
-        response = process_llm_response(user_request)
-        print(f"\nUser: {user_request}\nAssistant: {response}\n")
+@app.route('/interact', methods=['POST', 'OPTIONS'])
+def interact_with_llm():
+    """
+    API endpoint to interact with the LLM.
+    Expects a JSON payload with a 'user_input' key.
+    """
+    # Handle CORS preflight request
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'OK'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,ngrok-skip-browser-warning')
+        response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
+        return response
+    
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 415
+
+    data = request.get_json()
+    user_input = data.get('user_input')
+
+    if not user_input:
+        return jsonify({"error": "Missing 'user_input' in request payload"}), 400
+
+    # Process the user input with the LLM
+    response = process_llm_response(user_input)
+
+    # The response might be a tool call response or a direct assistant response
+    # For simplicity, we'll just return the processed response as JSON
+    # In a more complex app, you might want to handle tool call chaining differently
+    result = jsonify({"response": response})
+    result.headers.add('Access-Control-Allow-Origin', '*')
+    return result
+
+# ========================
+# 5️⃣ Run the Flask App
+# ========================
+if __name__ == '__main__':
+    # You can run this script directly: python your_script_name.py
+    # Then access the API at http://127.0.0.1:5000/interact
+    # Example POST request using curl:
+    # curl -X POST -H "Content-Type: application/json" -d '{"user_input": "Turn the fan on"}' http://127.0.0.1:5004/interact
+    app.run(debug=True, port=5004)

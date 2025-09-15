@@ -1,3 +1,4 @@
+transformers 
 outlines
 llguidance
 llama-cpp-python
