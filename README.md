@@ -85,4 +85,3 @@ If using Jetson or similar edge hardware:
 ## TODO 
 - update video 
 - install on jetson (check the vlm_processor_jetson)
-- Add dataset samples
