@@ -17,11 +17,16 @@ Demo: [Video 1](?) [Video 2](?)
 - Create a virtualenv or conda env 
 
 ```
+conda create --name vlmenv python=3.10
+```
+- Activate environment
+```
+conda activate vlmenv
 ```
 
 - Install the dependencies
 ```
-pip install requirements.txt
+pip install  -r requirements.txt
 ```
 
 - Start the Guage Inspector VLM

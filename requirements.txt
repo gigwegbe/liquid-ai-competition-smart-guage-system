@@ -6,6 +6,4 @@ llama-cpp-python
 Flask 
 flask_cors
 requests
-sseclient-py
-
-# pip install "smolagents[toolkit]"
+pillow 
