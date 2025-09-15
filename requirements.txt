@@ -1,3 +1,4 @@
+torch 
 transformers 
 outlines
 llguidance
@@ -6,4 +7,5 @@ Flask
 flask_cors
 requests
 sseclient-py
+
 # pip install "smolagents[toolkit]"
