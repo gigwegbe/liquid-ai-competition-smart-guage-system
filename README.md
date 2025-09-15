@@ -73,6 +73,7 @@ http://localhost:5173/
 - Refresh if needed: If the app doesn’t load immediately, try refreshing the page in your browser.
 
 
+![Guage Inspector](./assets/jetson-orin.jpg)
 ## Optional: Jetson / Edge Setup
 
 If using Jetson or similar edge hardware:
