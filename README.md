@@ -14,8 +14,14 @@ Demo: [Video 1](?) [Video 2](?)
 
 ### Backend
 
+- Create a virtualenv or conda env 
+
 ```
-    pip install requirements.txt
+```
+
+- Install the dependencies
+```
+pip install requirements.txt
 ```
 
 - Start the Guage Inspector VLM
@@ -40,3 +46,9 @@ npm install
 ```
 npm run dev 
 ```
+
+
+## TODO 
+- update video 
+- install on jetson 
+- 
