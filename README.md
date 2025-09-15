@@ -78,7 +78,7 @@ http://localhost:5173/
 
 If using Jetson or similar edge hardware:
 
-- Use vlm_processor_jetson.py for hardware‐specific optimizations
+- Use `vlm_processor_jetson.py` and `app-vlm-inference-jetson.py` for hardware‐specific optimizations
 - Verify any special dependencies (e.g. CUDA, camera drivers)
 - Adjust configuration / paths as needed
 
