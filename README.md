@@ -40,9 +40,10 @@ python3 app-llm-inference.py
 ```
 
 ### Frontend 
-Make sure you have install `npm` on your machine: 
+Install Node.js and npm
+Make sure you have Node.js (which includes npm) installed on your machine.
 
-- Then change the directory into the working directory: 
+- Navigate to the project directory: 
 ```
 cd vlm-instaector 
 ```
@@ -52,17 +53,18 @@ cd vlm-instaector
 npm install 
 ```
 
-- Run the app: 
+- Run the development server: 
 ```
 npm run dev 
 ```
 
-- Follow the path provided by the `run` command, mine is `http://localhost:5173/`
-
-- Open the app and refresh the page: 
+- Open the app in your browser. The terminal will show a local URL. By default, it’s usually:
 ```
 http://localhost:5173/
 ```
+
+- Refresh if needed: If the app doesn’t load immediately, try refreshing the page in your browser.
+
 
 ## TODO 
 - update video 
