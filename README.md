@@ -2,8 +2,11 @@
 
 Demo: [Video 1](?) [Video 2](?)
 
-![Guage Inspector](./assets/)
+![Guage Inspector](./assets/asset-full.png)
 
+![Guage Inspector](./assets/asset-sensor-reading.png)
+
+![Guage Inspector](./assets/asset-fan.png)
 ## How to run the Application
 ### Backend 
 
