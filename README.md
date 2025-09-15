@@ -7,7 +7,7 @@ Smart Gauge System is a project that uses computer vision with LM (Language Mode
 - Ability to control hardware (fan) via tool calls
 - Supports local development and deployment on Jetson / edge devices
 
-<!-- Demo: [Video 1](?) [Video 2](?) -->
+Demo: [Video 1](https://youtu.be/sJAFFJ6Rz6w) [Video 2](https://youtu.be/omaX1hHImjo) [Video 3](https://youtube.com/shorts/BjxGHmBQUnA)
 
 ### Using Vision Capabilities to Inspector Gauges (LFM2-VL-450M)
 ![Gauge Inspector](./assets/asset-full.png)
